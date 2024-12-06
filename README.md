@@ -7,6 +7,10 @@
 
  npm i nodemon
 
+ npm i dotenv
+
+ npm i mongoose
+
 ## in package-json
 "type":"module"
 
