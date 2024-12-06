@@ -1,11 +1,18 @@
 # hotelbooking
+
+## install dependecies
  npm init -y 
  
  npm i express
 
-## package-json
+ npm i nodemon
+
+## in package-json
 "type":"module"
 
-"sripsts":{
-"start":"node index.js"
+"scripts":{
+"start":"nodemon index.js"
 }
+
+## to run the project : 
+npm start
