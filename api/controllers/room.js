@@ -80,3 +80,58 @@ export const getRooms = async (req, res, next) => {
     next(err);
   }
 };
+
+
+// this is the patch method
+//The PATCH method is used to apply partial modifications to a resource.
+
+export const updateRoomPrice = async (req, res, next) => {
+  const roomId = req.params.id;
+  const { price } = req.body;
+
+  try {
+    const updatedRoom = await Room.findByIdAndUpdate(
+      roomId,
+      { price: price },
+      { new: true }
+    );
+    res.status(200).json(updatedRoom);
+  } catch (err) {
+    next(err);
+  }
+};
+
+//this is head method 
+// HEAD request to check if a room is available for specific dates
+
+export const checkRoomAvailability = async (req, res, next) => {
+  const roomId = req.params.id;
+  const { checkInDate, checkOutDate } = req.query;
+
+  try {
+    // Find the room by its ID
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return next(createError(404, "Room not found"));
+    }
+
+    // Check if the room is available during the requested date range
+    const isAvailable = room.roomNumbers.every((roomNumber) => {
+      return !roomNumber.unavailableDates.some((date) => {
+        return (
+          new Date(date).getTime() >= new Date(checkInDate).getTime() &&
+          new Date(date).getTime() <= new Date(checkOutDate).getTime()
+        );
+      });
+    });
+
+    // If the room is available, return status 200
+    if (isAvailable) {
+      res.status(200).send(); // No body, only status
+    } else {
+      res.status(404).send("Room is not available for the requested dates.");
+    }
+  } catch (err) {
+    next(err);
+  }
+};

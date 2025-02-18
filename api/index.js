@@ -6,6 +6,9 @@ import usersRoute from "./routes/users.js";
 import hotelsRoute from "./routes/hotels.js";
 import roomsRoute from "./routes/rooms.js";
 import cookieParser from "cookie-parser";
+import reviewRoutes from "./routes/reviews.js";
+import bookingRoutes from "./routes/bookings.js";
+import reportRoutes from "./routes/reports.js";
 
 
 const app = express();
@@ -33,6 +36,14 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/hotels", hotelsRoute);
 app.use("/api/rooms", roomsRoute);
+// Add review routes
+app.use("/api/reviews", reviewRoutes);
+// Add the booking routes
+app.use("/api/bookings", bookingRoutes);
+// Add the report routes
+app.use("/api/reports", reportRoutes);
+
+
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
