@@ -1,21 +1,20 @@
 import express from "express";
-import { createReview, addComment, getReviews } from "../controllers/review.js";
-import { addReplyToComment } from "../controllers/review.js";  // Import the new controller function
-import { verifyUser } from "../utils/verifyToken.js";
+import { createReview, addComment, addReplyToComment, getReviews } from "../controllers/review.js";
+import upload from "../utils/upload.js";  // Multer upload
 
 const router = express.Router();
 
-// CREATE REVIEW
-router.post("/:hotelId", verifyUser, createReview);
+// Create review (with image/video upload)
+router.post("/:hotelId",  upload.single("media"), createReview);
 
-// ADD COMMENT TO A REVIEW
-router.post("/comment/:reviewId", verifyUser, addComment);
+// Add comment to a review
+router.post("/comment/:reviewId",  addComment);
 
-// GET REVIEWS FOR A HOTEL
+// Get reviews for a hotel
 router.get("/:hotelId", getReviews);
 
-// Route for adding a reply to a comment
-router.post("/reply/:reviewId/:commentId", verifyUser, addReplyToComment);
-
+// Add a reply to a comment
+router.post("/reply/:reviewId/:commentId",  upload.single("media"), addReplyToComment);
 
 export default router;
+

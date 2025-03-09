@@ -1,16 +1,28 @@
 import Review from "../models/Review.js";
+import cloudinary from "../utils/cloudinaryConfig.js";  // Cloudinary config
 import { createError } from "../utils/error.js";
 
-// Add a review to a hotel
+// Create a review (with image/video upload)
 export const createReview = async (req, res, next) => {
-  const newReview = new Review({
-    hotelId: req.params.hotelId,
-    userId: req.body.userId,
-    reviewText: req.body.reviewText,
-    rating: req.body.rating,
-  });
-
   try {
+    const uploadedFile = req.file;  // File uploaded using multer
+
+    let mediaUrl = '';
+    if (uploadedFile) {
+      const cloudinaryResult = await cloudinary.v2.uploader.upload(uploadedFile.path, {
+        resource_type: "auto",  // Detect media type (image/video)
+      });
+      mediaUrl = cloudinaryResult.secure_url;  // Store Cloudinary URL
+    }
+
+    const newReview = new Review({
+      hotelId: req.params.hotelId,
+      userId: req.body.userId,
+      reviewText: req.body.reviewText,
+      rating: req.body.rating,
+      media: mediaUrl,  // Store media URL
+    });
+
     const savedReview = await newReview.save();
     res.status(200).json(savedReview);
   } catch (err) {
@@ -38,52 +50,41 @@ export const addComment = async (req, res, next) => {
   }
 };
 
-// Get reviews for a hotel with comments
-export const getReviews = async (req, res, next) => {
-  try {
-    const reviews = await Review.find({ hotelId: req.params.hotelId })
-      .populate("userId", "username") // Populate the user data
-      .populate("comments.userId", "username") // Populate user data for comments
-      .exec();
-
-    res.status(200).json(reviews);
-  } catch (err) {
-    next(err);
-  }
-};
-
 // Add a reply to a comment
 export const addReplyToComment = async (req, res, next) => {
   try {
-    const { reviewId, commentId } = req.params;  // Extract reviewId and commentId from params
-    const { userId, comment } = req.body;  // Extract userId and reply comment from request body
+    const { reviewId, commentId } = req.params;
+    const { userId, comment } = req.body;
 
-    // Find the review by reviewId
     const review = await Review.findById(reviewId);
     if (!review) return next(createError(404, "Review not found"));
 
-    // Find the comment by commentId within the review
     const commentToUpdate = review.comments.id(commentId);
     if (!commentToUpdate) return next(createError(404, "Comment not found"));
 
-    // Check if the comment already has 2 replies
-    if (commentToUpdate.replies.length >= 2) {
-      return next(createError(400, "A comment can have a maximum of 2 replies"));
-    }
-
-    // Add the reply to the comment
     const newReply = {
       userId: userId,
       comment: comment,
     };
 
-    // Push the new reply to the comment's replies array
     commentToUpdate.replies.push(newReply);
-
-    // Save the review with the new reply
     await review.save();
 
     res.status(200).json({ message: "Reply added successfully", comment: commentToUpdate });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get reviews for a hotel
+export const getReviews = async (req, res, next) => {
+  try {
+    const reviews = await Review.find({ hotelId: req.params.hotelId })
+      .populate("userId", "username")
+      .populate("comments.userId", "username")
+      .exec();
+
+    res.status(200).json(reviews);
   } catch (err) {
     next(err);
   }
