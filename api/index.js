@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import mongoose from "mongoose";
 import authRoute from "./routes/auth.js";
 import usersRoute from "./routes/users.js";
@@ -13,6 +14,13 @@ import reportRoutes from "./routes/reports.js";
 
 const app = express();
 dotenv.config();
+
+app.use(cors({
+  origin: "http://localhost:5173", // Allow requests from your frontend (Vite dev server)
+  methods: "GET, POST, PUT, DELETE",
+  credentials: true, // If you are using cookies
+})); // This allows all origins; you can restrict it to specific origins if needed
+app.use(express.json());
 
 const connect = async () => {
   try {
