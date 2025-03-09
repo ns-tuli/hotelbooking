@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import { createError } from "../utils/error.js";
 import jwt from "jsonwebtoken";
 
+// controllers/authController.js
+import { Router } from "express";
+const router = Router();
+
 export const register = async (req, res, next) => {
   try {
     const salt = bcrypt.genSaltSync(10);
@@ -41,3 +45,13 @@ export const login = async (req, res, next) => {
     next(err); // This will pass the error to the next error handling middleware
   }
 };
+
+
+// Logout Route: Delete the JWT token (clear from cookies if stored there)
+export const logout = (req, res) => {
+  // If you are storing the token in cookies, clear it
+  res.clearCookie("token");  // Remove the JWT token from cookies
+  res.status(200).send("Logged out successfully.");
+};
+
+export default router;
