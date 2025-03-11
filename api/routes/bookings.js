@@ -5,6 +5,6 @@ import { verifyUser } from "../utils/verifyToken.js"; // Optional, verify user a
 const router = express.Router();
 
 // Route to book a room
-router.post("/", verifyUser, bookRoom);
+router.post("/",  bookRoom);
 
 export default router;
